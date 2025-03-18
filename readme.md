@@ -19,6 +19,12 @@ Utilize a biblioteca de componentes ShadcnUI, que oferece componentes open-sourc
 npx shadcn@latest add nome-dos-componentes
 ```
 
+### Baixar as dependencias do front
+
+```
+npm install
+```
+
 ## Backend
 
 O framework utilizado backend foi o Laravel, devido à sua robustez e simplicidade no desenvolvimento de APIs, autenticação e operações em bancos de dados.
