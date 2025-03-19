@@ -9,22 +9,32 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [nome, setNome] = useState('');
   const router = useRouter();
-  const token = typeof window !== "undefined" ? (window.sessionStorage.getItem('token') || '{}') : '{}';
-  const user_id = typeof window !== "undefined" ? (window.sessionStorage.getItem('user_id') || '{}') : '{}';
-  useEffect(() => {
+  const token = typeof window !== "undefined" ? (window.sessionStorage.getItem('token') || null) : '{}';
+  const user_id = typeof window !== "undefined" ? (window.sessionStorage.getItem('user_id') || null) : '{}';
 
-    
+  useEffect(() => {
     if (token && user_id) {
-      const user = getUserById(parseInt(user_id)).then((data) => { 
+      setIsLoggedIn(true);
+
+      const user = getUserById(parseInt(user_id)).then((data) => {
         const name = data.name;
         setNome(name.split(" ")[0]);
       });;
-      setIsLoggedIn(true);
       setNome
+    } else {
+      setIsLoggedIn(false);
     }
   }, []);
 
   const handleLoginRedirect = () => {
+    router.push('/login');
+  };
+
+
+  const handleLogOutRedirect = () => {
+    window.sessionStorage.removeItem('token');
+    window.sessionStorage.removeItem('user_id');
+    setIsLoggedIn(false);
     router.push('/login');
   };
 
@@ -37,8 +47,11 @@ export default function Home() {
             <Button className="hover-white" onClick={handleLoginRedirect}>Login</Button>
           )}
           {isLoggedIn && (
-            <p className="text-lg font-semibold">Olá, {nome}</p>
-          )}	
+            <>
+              <p className="text-lg font-semibold">Olá, {nome}</p>
+              <Button className="hover-white" onClick={handleLogOutRedirect}>Log Out</Button>
+            </>
+          )}
         </div>
       </div>
       <Carteira />

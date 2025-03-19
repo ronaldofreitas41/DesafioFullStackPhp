@@ -14,6 +14,8 @@ import { InvestmentSection } from "@/components/carteira/investimentSection"
 import { getUserById } from "@/server/user"
 import { createTransference, deleteTransference, getReceiveById, getTransferenceById } from "@/server/transferences"
 
+
+
 export default function Carteira() {
   const [balance, setBalance] = useState(0)
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -25,33 +27,35 @@ export default function Carteira() {
   useEffect(() => {
     const token = typeof window !== "undefined" ? (window.sessionStorage.getItem('token') || '{}') : '{}';
     const user_id = typeof window !== "undefined" ? (window.sessionStorage.getItem('user_id') || '{}') : '{}';
-    const fetchData = async () => {
-      if (user_id && token) {
-        const data = await getUserById(parseInt(user_id));
-        setUser(data);
-        const contactData = await getContactById(parseInt(user_id), token);
-        setContacts(contactData);
+      const fetchData = async () => {
+        console.log("Resultado: ", (user_id && token));
+        if (user_id && token) {
+          console.log("Aqui");
+          const data = await getUserById(parseInt(user_id));
+          setUser(data);
+          const contactData = await getContactById(parseInt(user_id), token);
+          setContacts(contactData);
 
-        const depositData = await getDepositById(parseInt(user_id), token);
-        let history: Transaction[] = getAlldeposits(depositData);
-
-
-        const fundData = await getFunds(token);
-        const fundss: Fund[] = getallFunds(fundData);
-        setFunds([...fundss, ...funds]);
+          const depositData = await getDepositById(parseInt(user_id), token);
+          let history: Transaction[] = getAlldeposits(depositData);
 
 
-        const investimentsData = await getInvestmentById(parseInt(user_id), token);
-        const investmentss: Investment[] = getallInvestments(investimentsData);
-        setInvestments([...investmentss, ...investments]);
+          const fundData = await getFunds(token);
+          const fundss: Fund[] = getallFunds(fundData);
+          setFunds([...fundss, ...funds]);
 
-        const transferencesData = await getTransferenceById(parseInt(user_id), token);
-        const moreReceives = await getReceiveById(parseInt(user_id), token);
-        let history2 = getAllTransferences(transferencesData, moreReceives);
-        setTransactions([...history2, ...history, ...transactions]);
-      }
-    }
 
+          const investimentsData = await getInvestmentById(parseInt(user_id), token);
+          const investmentss: Investment[] = getallInvestments(investimentsData);
+          setInvestments([...investmentss, ...investments]);
+
+          const transferencesData = await getTransferenceById(parseInt(user_id), token);
+          const moreReceives = await getReceiveById(parseInt(user_id), token);
+          let history2 = getAllTransferences(transferencesData, moreReceives);
+          setTransactions([...history2, ...history, ...transactions]);
+        }
+      
+    
     //Função para pegar todas as transferencias e adiciona-las ao historico
     function getAllTransferences(transferencesData: any, moreReceives: any) {
       let history: Transaction[] = [];
@@ -159,7 +163,8 @@ export default function Carteira() {
       });
       return history;
     }
-    fetchData()
+  }
+  fetchData();
   }, [])
 
   //Função para adicionar um deposito
@@ -175,11 +180,11 @@ export default function Carteira() {
     const token = typeof window !== "undefined" ? (window.sessionStorage.getItem('token') || '{}') : '{}';
     if (user_id && token) {
       const id: number = parseInt(user_id);
-      const res = await createDeposit({ 
+      const res = await createDeposit({
         user_id: id,
         amount,
         description
-       }, token);
+      }, token);
       console.log("res: ", res);
     }
 
@@ -247,14 +252,14 @@ export default function Carteira() {
   //Função para desfazer uma transação
   const handleUndoTransaction = (transaction: Transaction) => {
     // Atualizar o saldo com base no tipo de transação
-    if (transaction.type === "deposit" ) {
+    if (transaction.type === "deposit") {
       deleteDeposit(parseInt(transaction.id), typeof window !== "undefined" ? (window.sessionStorage.getItem('token') || '{}') : '{}');
       setBalance((prev) => prev - transaction.amount);
 
     } else if (transaction.type === "transfer_in") {
       deleteTransference(parseInt(transaction.id), typeof window !== "undefined" ? (window.sessionStorage.getItem('token') || '{}') : '{}');
       setBalance((prev) => prev - transaction.amount);
-      
+
     } else if (transaction.type === "transfer_out") {
       // Se foi uma saída, adicionar ao saldo
       deleteTransference(parseInt(transaction.id), typeof window !== "undefined" ? (window.sessionStorage.getItem('token') || '{}') : '{}');
